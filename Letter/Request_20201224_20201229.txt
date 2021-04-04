@@ -1,0 +1,42 @@
+
+PS071
+
+Requirment: Add top up của năm tương ứng vào phí bảo hiểm định kỳ đối với sản phẩm chính là UL1, UL2.
+Người thực hiện: Tri Nguyen - IT
+Ngày thực hiện: 29-12-2020.
+
+Nội dung thực hiện:
+
+- Lấy top up năm 1, 2, 3, 4. 
+- Sử dụng function đã có sẵn: ZPREMEY.
+- Cấu hình bảng: T2635 add thêm các field LPREM01, LPREM02, LPREM03, LPREM04 vào cấu hình của các ITEM: LACMP, LCHGC, LRSTL, LTCMP.
+- Cấu hình bảng có sẵn: 
+
+T2636
+    LPREM01: Plan_Premium_01
+    LPREM02: Plan_Premium_02
+    LPREM03: Plan_Premium_03
+    LPREM04: Plan_Premium_04
+
+T2634: HADDCOM1 --> LACMP --> T2635 --> ADD FIELD --> LPREM01, LPREM02, LPREM03, LPREM04
+T2634: HCHGCOM1 --> LCHGC --> T2635 --> ADD FIELD --> LPREM01, LPREM02, LPREM03, LPREM04
+T2634: HRSTLET --> LRSTL --> T2635 --> ADD FIELD --> LPREM01, LPREM02, LPREM03, LPREM04
+T2634: HTERCOM1 --> LTCMP --> T2635 --> ADD FIELD --> LPREM01, LPREM02, LPREM03, LPREM04
+
+
+PRR PS071 --> F4 -> Member type: *WORK, JOB QUEUE: *NONE, 
+Promote level: Moi truong hien tai: *CUR, neu khac moi truong chinh lai (EX: PDEV)
+--> ENTER : PROMOTE RELATED WORK UNITS: Y
+
+WRKSPLF --> xem log
+LTREE *ALL --> Xem cay Moi truong.
+
+PDEV --> PSIT --> PUAT --> PRL
+
+HLDDRIVER PDEV
+RLSDRIVER PDEV
+SNDBRKMSG -- > send message
+WA -->
+
+T557
+

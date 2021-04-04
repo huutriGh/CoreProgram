@@ -1,0 +1,57 @@
+01  ZSA6-PARAMS.                               
+  03  ZSA6-FUNCTION             PIC X(00005).  
+  03  ZSA6-STATUZ               PIC X(00004).  
+
+
+
+   03  ZSA6-FORMAT               PIC X(00010). 
+
+KEY 
+    07  ZSA6-TAGNTNUM                  PIC X(00008). 
+
+NON-KEY 
+
+ 07  ZSA6-AGENTNAME                 PIC X(00047).          
+ 07  ZSA6-SUPERS.                                          
+  09  ZSA6-SUPER                    PIC X(00008)           
+                                     OCCURS 010 TIMES.     
+
+
+ ============================================================
+ 
+
+  01  AGLF-PARAMS.                               
+   03  AGLF-FUNCTION             PIC X(00005).  
+   03  AGLF-STATUZ               PIC X(00004).  
+
+KEY 
+ AGLF-AGNTCOY                   PIC X(00001). 
+ AGLF-AGNTNUM                   PIC X(00008). 
+
+ ============================================================
+
+
+ 01  AGNT-PARAMS.                               
+  03  AGNT-FUNCTION             PIC X(00005).  
+  03  AGNT-STATUZ               PIC X(00004). 
+
+
+KEY 
+
+ AGNT-AGNTPFX                   PIC X(00002).    
+ AGNT-AGNTCOY                   PIC X(00001).    
+ AGNT-AGNTNUM                   PIC X(00008).    
+
+NON-KEY
+
+AGNT-CLNTNUM
+
+============================================================
+WSAA-SUPER-CNT              PIC 9(02) VALUE 0.
+WSAA-AGNTNAME               PIC X(40).        
+WSAA-END-FILE               PIC X(01).        
+HAS-AGNT-CLNTNUM            PIC X(01).      
+WSAA-AGNTNUM
+WSAA-CLNTNUM
+
+\\10.9.1.98\phl\IT\TEMPLATES\PRL\PAYMENT

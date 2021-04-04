@@ -1,0 +1,46 @@
+Cấu trúc nội dung thư là XML. 
+LETC --> Online.
+LETB --> Batch Job.
+LETRQST --> Subroutine
+XML400 CL
+XMLTPF --> Copy --> XML 
+3.2 Processing (Document)
+3.3 Processing Table
+TR383: Cau hinh thu trong group thu. (EX HPOLSCD)
+T6252: Path.
+T2656: XML Printing Parameters for Use. 
+TR384: Letter type === Contract type + Transaction code. (letter group)
+T2634: Dinh nghia template. Kiem tra bang letter type
+       Letter Field ID Code.
+       User Data Entry Required:3
+       Creation: In ra file liền hay không.
+       Location of Letter Template: /PRLPM01/{VM}DIR/{LEVEL}/TEMPLATES/LETTERTYPE/HPYAUT.XSL
+       XML Print: X XMLFORMAT.
+T2635: Tat ca gia tri out put ra XML. (Tat cac field)
+       Start with F#: Filed Group.  Xem chi tiet T2636
+T2636: Function lay ra gia tri cua tung field.
+
+       Field Transfer Name: Tag Name in XML.
+       Extract Subrountine:
+       Field Offset position: Luu y trong chuong trinh phai ghi chu Offset tuong ung.  (EX: ANIVERD)
+       PCPLDCLM, PCPLCHDR
+T1901: Company 0.
+T2657: Config goi java
+XML40CL *CLP
+
+T1902
+line 212 - 219
+       225 - 237
+
+
+
+ (PCPLCVRALL: Reference)      
+
+       p5074at
+       LETRQSTREC: Copy book cua LETRQSTREC
+***: không phân biệt contract type.
+=========He thong IBM=========
+            RPG
+            COBOL
+            CL
+

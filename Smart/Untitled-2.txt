@@ -1,0 +1,55 @@
+===============================================================
+
+WSAA-AGNTNUM
+WSAA-AGNTNAME
+WSAA-TSALEUNT
+WSAA-ARACDE
+WSAA-DTEAPP
+WSAA-DTETRM
+WSAA-LEADERNUM
+WSAA-CHDRNUM   
+WSAA-TTPREM    
+WSAA-BILLFREQ
+
+
+PVZZ8-AGENTFROM    
+PVZZ8-AGENTTO      
+
+
+D-AGNTNAME                    
+D-TSALEUNIT                   
+D-ARACDE                      
+D-DTEAPP                      
+D-DTETRM                      
+D-LEADERNUM                   
+D-CHDRNUM                     
+D-TTPREM                      
+D-BILLFREQ        
+
+
+CHDRAGT-AGNTPFX.  
+CHDRAGT-AGNTCOY.  
+CHDRAGT-AGNTNUM.  
+CHDRAGT-VALIDFLAG.
+CHDRAGT-CHDRCOY.  
+CHDRAGT-CHDRNUM.  
+CHDRAGT-FORMAT.   
+
+
+CHDRAGT-AGNTPFX   
+CHDRAGT-AGNTCOY
+CHDRAGT-AGNTNUM  
+CHDRAGT-VALIDFLAG
+CHDRAGT-CHDRCOY   
+CHDRAGT-CHDRNUM    
+
+
+
+ 01  DTC1-DATCON1-REC.                            
+     03  DTC1-FUNCTION           PIC X(04).       
+     03  DTC1-STATUZ             PIC X(04).       
+     03  DTC1-INT-DATEX.                          
+         05  DTC1-INT-DATE       PIC 9(08).       
+     03  DTC1-EXT-DATE           PIC X(10).       
+     03  FILLER                  PIC X(54).       
+*                                                 

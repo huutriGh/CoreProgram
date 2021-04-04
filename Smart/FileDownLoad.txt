@@ -1,0 +1,260 @@
+
+CRTTMPF
+
+FILE
+    CHDRPF
+        - CHDRNUM : Contract number.
+        - CNTTYPE: Contract type.
+        - AGNTNUM: Agent number.
+        - DESPNUM - COWNNUM: Policy owner.
+        - STATCODE: Policy status.
+        - BILLFREQ: Billing Frequency.
+        - INSTTOT06: Install Premium.
+        - BTDATE: Bill to date.
+        - PTDATE: Paid to date.
+    CHDRPF JOIN AGNTPF on CHDRPF-AGNTNUM =  AGNTPF-AGNTNUM
+        --> AGNTPF-CLNTNUM --> AGNTPF JOIN CLNTPF on AGNTPF-CLNTNUM = CLNTPF-CLNTNUM
+        --> LSURNAME + LGIVNAME: Agent name.
+
+    CHDRNUM JOIN CLNTPF ON CHDRNUM-(DESPNUM - COWNNUM) = CLNTPF-CLNTNUM
+        --> LSURNAME + LGIVNAME: Policy owner name.
+
+
+
+select CHDRPFX, CHDRCOY, CHDRNUM, COWNNUM, AGNTNUM, PTDATE, BTDATE, STATCODE, BILLFREQ,
+INSTTOT06
+from CHDRPF where CHDRNUM = '80059276' and VALIDFLAG = '1'
+--select * from AGLFPF where AGNTNUM = '69999997' and VALIDFLAG = '1'
+select * from AGNTPF where AGNTNUM ='69999997' and VALIDFLAG = '1'
+select  * from CLNTPF where CLNTNUM in ('30115982','30000170') and VALIDFLAG = '1'
+
+
+KEY
+    CHDRAGT-AGNTPFX                PIC X(0002).  
+    CHDRAGT-AGNTCOY                PIC X(0001).  
+    CHDRAGT-AGNTNUM                PIC X(0008).  
+    CHDRAGT-VALIDFLAG              PIC X(0001).  
+    CHDRAGT-CHDRCOY                PIC X(0001).  
+    CHDRAGT-CHDRNUM                PIC X(0008).  
+    
+CHDRAGTREC
+
+CHDRAGT-CNTTYPE 
+CHDRAGT-STATCODE    
+CHDRAGT-INSTTOT06
+CHDRAGT-BTDATE 
+CHDRAGT-PTDATE
+CHDRAGT-COWNNUM 
+CHDRAGT-BILLFREQ
+
+CHDRAGTIO
+CHDRAGT-FORMAT 
+CHDRAGT-PARAMS.    
+  CHDRAGT-FUNCTION 
+
+
+AGNTREC
+
+AGNTENQ-PARAMS.   
+  AGNTENQ-FUNCTION
+  AGNTENQ-STATUZ
+
+KEY
+    AGNTENQ-AGNTCOY                PIC X(00001).  
+    AGNTENQ-AGNTNUM                PIC X(00008).  
+
+ AGNTENQ-TRANID                 PIC X(00014).   
+ AGNTENQ-CLNTCOY                PIC X(00001).   
+ AGNTENQ-CLNTNUM                PIC X(00008).   
+ AGNTENQ-VALIDFLAG              PIC X(00001).   
+ AGNTENQ-USER-PROFILE           PIC X(00010).   
+
+
+CLNTREC.
+
+CLNT-PARAMS.       
+  CLNT-FUNCTION    
+  CLNT-STATUZ      
+
+KEY
+    CLNT-CLNTPFX  
+    CLNT-CLNTCOY  
+    CLNT-CLNTNUM  
+DATA
+
+     CLNT-LSURNAME  
+     CLNT-LGIVNAME  
+
+
+
+
+
+
+WSAA-CLNTNUM                
+WSAA-AGNTNUM                
+WSAA-COWNNUM                
+HAS-AGNT-CLNTNUM            
+WSAA-COWNNAME               
+WSAA-AGNTNAME               
+WSAA-GET-AGNTNAME           
+
+
+
+ STRING                                                    
+        CLNT-LGIVNAME DELIMITED BY ' '                     
+        SPACES CLNT-LSURNAME DELIMITED BY SIZE             
+        INTO WSAA-AGNT-NAME                                
+ END-STRING.                                               
+
+
+
+
+D-CHDRNUM  
+D-CNTTYPE  
+D-AGNTNUM  
+D-AGNTNAME 
+D-COWNNUM  
+D-COWNNAME   
+D-STATCODE 
+
+
+
+
+ D-STATCODE       
+            
+ D-BILLFREQ       
+            
+ D-INSTPREM       
+            
+ D-BTDATE         
+            
+ D-PTDATE         
+
+
+
+
+  01 WSAA-ZSA5-FN.             
+    03                
+    03  WSAA-ZSA5-RUNID       
+    03  WSAA-ZSA5-JOBNO       
+                              
+ 01 WSAA-THREAD-MEMBER.       
+    03                
+    03  WSAA-THREAD-NUMBER    
+    03                
+                              
+ 01 WSAA-QCMDEXC              
+ 01 WSAA-QCMDEXC-LENGTH       
+                              
+ 01 WSAA-REC                  
+
+==========================================
+E050
+H946 
+
+ZIVRPF
+ZCSVPF
+
+
+
+
+D-CHDRNUM
+D-OCCDATE
+D-COWNNUM
+D-AGNTNUM
+D-INSPREM 
+
+
+CHDRAGT-VALIDFLAG
+D-INSTPREM -- D-INSPREM
+D-COWNADD -- D-ADDRESS
+
+
+
+
+WSAA-CLNTNUM       
+WSAA-AGNTNUM       
+WSAA-COWNNUM       
+HAS-AGNT-CLNTNUM   
+WSAA-COWNNAME      
+WSAA-AGNTNAME      
+WSAA-GET-AGNTNAME  
+WSAA-END-FILE      
+WSAA-COWNADD       
+WSAA-AGNTADD       
+WSAA-LEADERNAME    
+
+
+
+
+====================================
+READ CHDR ==> 
+              MOVE CHDRLNB-AGNTNUM     TO WSAA-AGNTNUM  
+              MOVE CHDRLNB-COWNNUM     TO WSAA-COWNNUM  
+
+READ AGNT 
+=> PASS WSAA-AGNTNUM
+      ==>     
+              MOVE AGNT-CLNTNUM        TO WSAA-CLNTNUM    
+    
+
+READ AGLF ==> 
+              MOVE AGLF-REPORTAG       TO WSAA-AGNTNUM
+
+
+
+
+MOVE AGLF-REPORTAG       TO WSAA-AGNTNUM 
+
+
+
+IF WSAA-GET-AGNTNAME        = 'Y' OR SPACE     
+                                               
+   MOVE WSAA-CLNTNUM        TO CLNT-CLNTNUM    
+                                               
+ELSE                                           
+                                               
+   MOVE WSAA-COWNNUM        TO CLNT-CLNTNUM    
+                                               
+END-IF.  
+
+
+
+ D-CHDRNUM     
+ D-CNTTYPE     
+ D-COWNNAME    
+ D-COWNADD     
+ D-AGNTNUM     
+ D-AGNTNAME    
+ D-AGNTADD
+ D-LEADERNUM  
+ D-LEADERNAME    
+
+
+ H-CNTTYPE  
+
+
+ WSAA-AGNTNUM='60000176'  
+WSAA-COWNNUM='30003182'  
+
+
+H946 -- > Invalid Contract  --> RF01
+D031 -- > Contract Number Required -- > F692
+
+
+
+
+
+
+
+===============================================================
+D-AGNTNUM   
+D-AGNTNAM   
+D-TSALEUN    
+D-ARACDE     
+D-DTEAPP       
+D-DTETRM         
+D-LEADERNUM      
+D-CHDRNUM        
+D-TTPREM          
+D-BILLFREQ

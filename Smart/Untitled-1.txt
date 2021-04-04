@@ -1,0 +1,135 @@
+
+
+ 
+KEY
+************************ 
+CHDRAGT-AGNTPFX 
+CHDRAGT-AGNTCOY 
+CHDRAGT-AGNTNUM 
+CHDRAGT-VALIDFLAG
+CHDRAGT-CHDRCOY 
+CHDRAGT-CHDRNUM 
+
+NON-KEY
+***********************
+CHDRAGT-STATCODE
+CHDRAGT-COWNNUM
+CHDRAGT-OCCDATE
+CHDRAGT-SINSTAMT06
+
+5000-LOAD-SUBFILE-PAGE.
+
+
+
+5750-NEXT-CLTN.
+
+A250-NEXT.
+
+
+
+WSSP-SRHLIMIT
+CLRL-FLAG02 = 'AG'
+2935, 1991, 2005, 2569, --> 5850-CHECK-STATUZ, 1895
+ 1150-CONT
+ --> A100-FIND-FIRST
+ --> A300-FIRST-CLTA
+    --> A350-NEXT
+       -->  5100-WRITE-TO-SUBFILE 
+       --> 1754 
+       --> 5150-CONT 
+       --> 5160-CONT 
+       --> 5170-NEXT-REC
+          --> 5200-NEXT-CLTA   
+          --> 5800-CONT 
+          --> 5850-CHECK-STATUZ
+       --> 5100-WRITE-TO-SUBFILE   
+
+WSAA-SRHLIMIT
+SXXXX-SUBFILE-PAGE
+
+
+
+COVT
+*********************
+CHDRCOY      
+CHDRNUM      
+LIFE         
+COVERAGE     
+RIDER        
+PLNSFX       
+
+
+COVR
+********************
+COVR-CHDRCOY 
+COVR-CHDRNUM 
+COVR-LIFE    
+COVR-COVERAGE
+COVR-RIDER   
+COVR-PLNSFX   
+
+
+
+
+
+ZZZ3-TAGNTNUM          
+ZZZ3-TCHDRNUM          
+ZZZ3-TCTRSTA           
+ZZZ3-SPRM              
+ZZZ3-TRAN-DATE         
+
+
+SVZZ5-AGENTNO
+SVZZ5-ACCTYPE  
+SVZZ5-BNFTAMT  
+SVZZ5-COWNNUM  
+SVZZ5-DORGSI   
+SVZZ5-ISSDATE  
+SVZZ5-POLICNO  
+SVZZ5-SLT      
+
+
+
+
+
+MOVE TDAY                   TO DTC1-FUNCTION.          
+CALL 'DATCON1'              USING DTC1-DATCON1-REC.    
+                                                       
+MOVE DTC1-INT-DATE          TO WSAA-TODAY.             
+                                                       
+COPY DATCON1REC. 
+
+
+
+
+SVZZ6-ACTN     
+SVZZ6-AGENTNO  
+SVZZ6-CLNTNAME 
+SVZZ6-GIVNAME  
+SVZZ6-OFFCDE   
+
+
+SVZZ6-ACTN-OUT       
+SVZZ6-AGENTNO-OUT    
+SVZZ6-CLNTNAME-OUT   
+SVZZ6-GIVNAME-OUT    
+SVZZ6-OFFCDE-OUT     
+
+
+ZZZ4-TAGNTNUM          
+ ZZZ4-TLNAME     
+ ZZZ4-TFNAME     
+ ZZZ4-TAREACODE  
+
+
+
+                                                    
+  MOVE ZZZ4-TAGNTNUM          TO SVZZ6-AGENTNO.    
+  MOVE ZZZ4-TLNAME            TO SVZZ6-CLNTNAME.   
+  MOVE ZZZ4-TFNAME            TO SVZZ6-GIVNAME.    
+  MOVE ZZZ4-TAREACODE         TO SVZZ6-OFFCDE.     
+                                                   
+  ZAGRFIND.                                                 
+
+#CTR-BV361 --> #BV363 --> #BV364
+CRTTMPF        BV363  --> BVCPY

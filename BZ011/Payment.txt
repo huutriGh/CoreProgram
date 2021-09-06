@@ -1,0 +1,78 @@
+======L2NEWPAYRP======
+TABLE
+	DESCPF
+	ITEMPF
+	CLTSPF
+	CLEXPF
+	CHEQPF
+	USRDPF
+	ACMVPF
+	PREQPF
+	BABRPF
+	RMRKPF
+	CHDRPF
+	AGNTPF
+	ZCLEPF
+	
+
+
+Parameter khi chạy batch job: 
+ Office : WOFFCODE                                       
+                                                 
+ User ID: PROCUSR                              
+                                                 
+ Payment Method: PYMCHQ    --> REQNTYPE                             
+                                                 
+ Payment Status: PAYSTATZ  --> PROCIND                              
+                                                 
+ Payment From Date: DATEFRM  To: DATETO   
+ 
+ 
+ 
+============Các bước lấy data============
+Bắt đầu từ bảng CHEQPF --> Join với các file khác để lấy.
+
+SELECT        REQNCOY, PROCIND, REQNNO, REQNTYPE, PAYAMT, REQNBCDE, CLNTCOY, CLNTNUM01, CLTTYPE01, CHEQNO, CHEQDUPN, BANKKEY, BANKACCKEY, REQUSER, REQDATE, AUTHUSER, AUTHDATE, APPRUSER, 
+                         APPRDTE, USER , PAYDATE, BRANCH, REQNREV, ZPRNNO, PAYCURR
+FROM            CHEQPF
+
+
+0. PROCUSR: tùy vào CHEQPF.PROCIND là gì mà lấy user no tương ứng trong CHEQPF --> JOIN các cột User trong câu select vào bảng USRDPF.USERMUM --> Lấy được UserID.
+	PAY-CREATED                 VALUE 'RQ' --> REQUSER
+	PAY-APPROVED                VALUE 'AQ' --> APPRUSER
+	PAY-AUTHORISED              VALUE 'AU' --> AUTHUSER
+	PAY-PROCESSED               VALUE 'PR' --> AUTHUSER
+	PAY-CANCELLED               VALUE 'RC' --> USER
+ 
+1. CHDRNUM: 
+	- Là PREQPF.RLDGACCT Nếu CHEQPF.REQNTYPE <> 'PR': JOIN CHEQPF.REQNNO = PREQPF.RDOCNUM and CHEQPF.REQNCOY = PREQPF.RDOCCOY  and PREQPF.RDOCPFX= 'RQ' and  PREQPF.JRNSEQ = 1.
+	- Ngược lại là ACMVPF.RLDGACCT: JOIN CHEQPF.REQNNO = ACMVPF.RDOCNUM and CHEQPF.REQNCOY = ACMVPF.RDOCCOY and ACMVPF.JRNSEQ = 1 and  ACMVPF.RDOCPFX = 'RQ'
+2. REQNNO: là REQNNO trong CHEQPF
+3. PAYEENME: CHEQPF.CLNTNUM01 = CLNTPF.CLNTNUM and CHEQPF.CLNTCOY = CLNTPF.CLNTCOY  and CLNTPF.CLNTPFX = 'CN'. Tiếp theo lấy tên thế nào thì đã rành rồi.
+4. SECUITYNO: CLNTPF.SECUITYNO
+5. XAMTPAY: CHEQPF.PAYAMT
+6. SACSTYPE: PREQPF.SACSTYPE hoặc ACMVPF.SACSTYPE có được cùng với CHDRNUM ở mục 1.
+7. DESCR: select D.LONGDESC from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where ITEMITEM = (6.SACSTYPE) and ITEMTABL = 'T3695'
+8. PAYMMETH: CHEQPF.REQNTYPE
+9. PYMDESC: select D.LONGDESC from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where ITEMITEM = CHEQPF.REQNTYPE and ITEMTABL = 'T3672'
+10. STATDETS: select D.LONGDESC from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where ITEMITEM = CHEQPF.PROCIND and ITEMTABL = 'T3593'
+11. BANKCODE: CHEQPF.REQNBCDE
+12. BANKKEY: CHEQPF.BANKKEY
+13. BABRDC: CHEQPF.BANKKEY = BABRPF.BANKKEY --> BABRPF.BANKDESC
+14. BRANCHDC: BABRPF.ZDETAL
+15. ZTRDDS: BABRPF.ZTRDDS
+16. BANKCITY: BABRPF.BANK_ADDR05
+17. BANKACCKEY:  CHEQPF.BANKACCKEY
+18. TEXTDATE: Ngày cấp CMND của PAYEE --> Join Từ CLNT qua CLEXPF quá rành rồi
+19. ZIDPLACE: Nơi cấp CMND của PAYEE --> Join Từ CLNT qua CLEXPF 
+20. REPDATE: getdate()
+21. AUTHDATE : CHEQPF.AUTHDATE 
+22. PMNOTE: CHEQPF.REQNNO = RMRKPF.RDOCPFX and  RMNK.RDOCPFX = 'RQ' --> RMRKPF.ALINE  Sẽ ra được nhiều dòng nên phải gom lại thành 1 dòng duy nhất. Sử dụng for XML để làm.
+23. WOFFCODE: Láy từ ITEMPF --> ITEMPF.ITEMPFX = 'IT' and  ITEMITEM= USEID ở mục 0 and  ITEMTABL ='TV023'. Ví dụ select  SUBSTRING(LTRIM(I.GENAREA),1,5) from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where  ITEMTABL = 'TV023' and ITEMITEM ='VOPS0105'
+24. OFFDES: Lấy WOFFCODE đọc vào DESCPP --> LONGDESC. Ví dụ select  D.LONGDESC from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where  ITEMTABL = 'TV022' and ITEMITEM =WOFFCODE
+25. SACSCODE: PREQPF.SACSCODE hoặc ACMVPF.SACSCODE có được cùng với CHDRNUM ở mục 1.
+
+
+
+
+	

@@ -1,0 +1,125 @@
+Đầu tiên lấy data từ câu select:
+=====================================
+SELECT BATCTRCDE, RDOCCOY, RDOCNUM, RLDGPFX, RLDGCOY,
+RLDGACCT, EFFDATE, TRANDESC, BANKCODE, SACSCODE,
+SACSTYP, USER_PROFILE, TRANNO, RDOCPFX                  
+FROM RTRNPF WHERE RT.SACSCODE ='CN' and RT.BATCTRCDE in ('T204', 'T205', 'T2A3')
+
+Gán giá trị vào các field trên Excel:
+========================================
+1. ZVARIABLE = ZP.RCPREPRTCD + '-' + ZP.RCPREPRNT
+
+	Đọc vào bảng ZPPRPF ZP với RT.BANKCODE = ZP.BANKCODE and RT.RDOCNUM = ZP.RECEIPT and RT.RDOCCOY = ZP.COMPANY and  ZP.PREFIX ='CA'.
+	Bảng này chưa có mirror. Sẽ cập nhật mirror sau.
+
+2. RECEIPT 
+
+	Bằng RT.RDOCNUM
+
+3. CHDRNUM
+
+	Cột này không hiểu ý đồ của code. 
+	Các bước:
+	a. Đọc vào bảng RTRNPF RT1 với RT.RDOCCOY = RT1.RDOCCOY and RT.RDOCNUM = RT1.RDOCNUM and RT1.RLDGCOY = '2' order theo RT1.RDOCPFX, RT1.RLDGCOY, RT1.RDOCCOY, RT1.RDOCNUM ASC
+	b. Loop qua record ở bước a trên đọc vào bảng CHDRPF CH  với LEFT(RT1.RLDGACCT,8) = CH.CHDRNUM and  RT1.RDOCCOY = Ch.CHDRCOY.  Lấy được CHDRNUM từ CH.CHDRNUM.
+	(Chỗ khó hiểu bắt đầu).
+	c. Đọc vào ACMVPF AC với RT.RDOCCOY = AC.RLDGCOY and RT.RDOCNUM = AC.RDOCNUM  
+	where AC.SACSTYP not in ('AA','LA') and AC.GLSIGN ='-'
+	order theo AC.RLDGCOY, AC.RDOCNUM, AC.TRANNO  ASC 
+	d. Loop qua record ở bước c. đọc vào bảng CHDRPF CH  với LEFT(AC.RLDGACCT,8) = CH.CHDRNUM and  AC.RDOCCOY = Ch.CHDRCOY and CH.SERVUNIT ='LP.
+	Nếu đọc có data thì gán CH.CHDRNUM hoặc không có thì gán '' vào CHDRNUM trước đó.
+	
+	
+4. OWNERNAME. 
+	
+	Có được CHDRNUM ở bước 3 thì đọc vào bảng CLNTPF để lấy thông qua CHDRPF.COWNNUM = CLNTPF.CLNTNUM
+	
+5. PAYRNAME.
+
+	Lấy LEFT(RT.RLDGACCT,8) trên câu select đầu tiên đọc vào bảng CLNTPF thông qua CLNTPF.CLNTNUM = LEFT(RT.RLDGACCT,8)
+
+	
+6. CLNTNMXL
+
+	Bằng với cột PAYRNAME.
+
+7.CLNTNUM.
+	
+	Bằng LEFT(RT.RLDGACCT,8) trong câu select ban đầu.
+	
+8. DOCORIGAMT
+
+	a. Đọc vào bảng RBNKPF RB thông qua  RT.RDOCCOY = RB.RDOCCOY and RT.RDOCNUM = RB.RDOCNUM and RB.RDOCPFX = 'CA'.
+	b. lấy được RB.DOCORIGAMT gán vào --> Bị ghi đè lại bằng RT1.ORIGAMT có được ở mục 3a --> bị ghi đè lại bằng AC.ORIGAMT ở mục 3d.
+	
+
+9. BANKCODE
+
+	Bằng RT.BANKCODE
+
+10. USERID
+
+	Bằng RT.USER_PROFILE,
+	
+11. BNKNAME
+
+	Bằng RB.BANKDESC01 ở mục 8	
+ 
+12. BRCHNAME
+
+	Bằng RB.BANKDESC02 ở mục 8
+	
+	
+13. SACSCODE
+
+	Bằng RT1.SACSCODE ở bước 3a --> Bị ghi đè lại bằng AC.SACSCODE ở bước 3c
+14. SACSTYPE
+
+	Bằng RT1.SACSTYP ở bước 3a --> Bị ghi đè lại bằng AC.SACSTYP ở bước 3c
+	
+15. LONGDSC
+
+	Bằng ITEMPF.GENAREA. Đọc vào bảng ITEM IT với IT.ITEMTABL = 'TV088' and IT.ITEMITEM = 'SACSCODE+ SACSTYP' co được ở mục 13, 14. 
+	'SACSCODE+ SACSTYP': Trường hợp CH.STATCODE = 'LA' (có được mục 3), SACSCODE ='LP' , SACSTYP ='S' thì đổi SACSTYP thành 'SR' trước khi select vào ITEMPF.
+
+16. INSREFNO
+
+	Bằng RB.INSREFNO có được ở mục 8.
+
+17. DATECFROM: Lấy all nên ko cần.
+
+18. DATECTO: Lấy all nên ko cần.
+
+19. TRANDESC
+
+	Bằng RT1.TRANDESC  ở bước 3a --> Bị ghi đè lại bằng AC.TRANDESC ở bước 3c.
+
+20. PMNOTE
+
+	Bằng RMRKPF.ALINE. Đọc RMRKPF RM  RT.RDOCNUM = RM.RDOCPFX and  RM.RDOCPFX = 'RQ' -->   Sẽ ra được nhiều dòng nên phải gom lại thành 1 dòng duy nhất. Sử dụng for XML để làm.
+
+21. EFFDATES
+
+	Bằng RT.EFFDATE có được trong cấu select.
+	
+22. WOFFCODE
+
+	Lấy từ ITEMPF --> ITEMPF.ITEMPFX = 'IT' and  ITEMITEM= 'RT.USER-PROFILE'  ITEMTABL ='TV023'. 
+	Ví dụ select  SUBSTRING(LTRIM(I.GENAREA),1,5) from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where  ITEMTABL = 'TV023' and ITEMITEM ='VOPS0105'
+
+23. OFFDES
+
+	Lấy WOFFCODE mục 22 đọc vào DESCPP --> LONGDESC. 
+	Ví dụ select  D.LONGDESC from ITEMPF I LEFT JOIN DESCPF D  on I.ITEMTABL = D.DESCTABL and I.ITEMITEM = D.DESCITEM where  ITEMTABL = 'TV022' and ITEMITEM =WOFFCODE
+
+24. TIMEJOB. 
+
+25. ZTRNDATE
+
+	Bằng RB.DEPDATE có được ở mục 8.
+
+	
+
+
+
+

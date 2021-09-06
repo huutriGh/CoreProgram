@@ -14,7 +14,7 @@
       ***********************************************************************
       * DATE.... VSN/MOD  WORK UNIT    BY....                               *
       *                                                                     *
-      * 02/04/21  01/01   DUMMY        IT-Nguyen Huu Tri                    *
+      * 02/04/21  01/01   NB045        IT-Nguyen Huu Tri                    *
       *           VALIDATE SEQUENCE OF LIFE AND COVERAGE IS COTINUOUS.      *
       *                                                                     *
       **DD/MM/YY*************************************************************
@@ -56,7 +56,10 @@
        01  WSAA-CNTCOVR-R  REDEFINES   WSAA-CNTCOVR PIC 9(02).
        01  WSAA-END                    PIC X(01).
        01  WSAA-ERRCODE                PIC X(04).
-       01  WSAA-ISFIRSTROW             PIC X(01).
+       01  WSAA-FIRSTR-CHECKED         PIC X(01).
+       01  WSAA-EXIST-LIFE             PIC X(01).
+       01  WSAA-EXIST-COVR             PIC X(01).
+
       *
       *
       /
@@ -83,10 +86,13 @@
 
            INITIALIZE                     COVTCSN-PARAMS.
            MOVE 'N'                    TO WSAA-END.
+           MOVE 'N'                    TO WSAA-FIRSTR-CHECKED.
+           MOVE 'N'                    TO WSAA-EXIST-LIFE.
+           MOVE 'N'                    TO WSAA-EXIST-COVR.
            MOVE O-K                    TO VLSB-STATUZ.
            MOVE ZEROES                 TO IDX.
-           MOVE '00'                   TO WSAA-CNTLIFE.
-           MOVE '00'                   TO WSAA-CNTCOVR.
+           MOVE '01'                   TO WSAA-CNTLIFE.
+           MOVE '01'                   TO WSAA-CNTCOVR.
            MOVE VLSB-CHDRCOY           TO COVTCSN-CHDRCOY.
            MOVE VLSB-CHDRNUM           TO COVTCSN-CHDRNUM.
            MOVE SPACES                 TO COVTCSN-LIFE.
@@ -127,29 +133,8 @@
               GO TO 210-EXIT
 
            END-IF.
-      
-           IF WSAA-ISFIRSTROW                 = 'Y'
 
-               IF COVTCSN-LIFE            NOT = '01'
-    
-                  MOVE EZ81                TO  WSAA-ERRCODE
-                  PERFORM 500-MOVE-ERROR 
-                  MOVE 'Y'                 TO  WSAA-END 
-                  GO TO 210-EXIT
-    
-               END-IF
-    
-               ELSE IF COVTCSN-COVERAGE        NOT = '01'
-    
-                  MOVE EZ82                TO  WSAA-ERRCODE
-                  PERFORM 500-MOVE-ERROR 
-                  MOVE 'Y'                 TO WSAA-END
-                  GO TO 210-EXIT
-              
-               END-IF
 
-           END-IF.    
-           MOVE 'N'                 TO WSAA-ISFIRSTROW  
            PERFORM 300-CHECK-SEQUENCE-LIFE.
 
            MOVE NEXTR                  TO COVTCSN-FUNCTION.
@@ -160,45 +145,73 @@
        300-CHECK-SEQUENCE-LIFE SECTION.
       ************************************
        300-START.
-           ADD 1                       TO WSAA-CNTLIFE-R
+
            IF COVTCSN-LIFE                = WSAA-CNTLIFE
-              ADD 1                    TO WSAA-CNTCOVR-R
-              IF COVTCSN-COVERAGE    NOT  = WSAA-CNTCOVR
 
-                 MOVE EZ82            TO    WSAA-ERRCODE
-                 PERFORM 500-MOVE-ERROR
-                 MOVE 'Y'             TO    WSAA-END
-                 GO TO 310-EXIT
+              IF COVTCSN-COVERAGE     NOT = WSAA-CNTCOVR
 
-              ELSE
+                 IF  WSAA-FIRSTR-CHECKED  = 'N'
 
-                 SUBTRACT 1 FROM WSAA-CNTCOVR-R
-                 ADD 1 TO  WSAA-CNTCOVR-R
+                     MOVE EZ82         TO   WSAA-ERRCODE
+                     PERFORM 500-MOVE-ERROR
+                     MOVE 'Y'          TO   WSAA-EXIST-COVR
+                     MOVE 'Y'          TO   WSAA-FIRSTR-CHECKED
+
+                 ELSE
+
+                     ADD 1             TO   WSAA-CNTCOVR-R
+
+                     IF COVTCSN-COVERAGE  NOT = WSAA-CNTCOVR
+
+                        MOVE EZ82      TO   WSAA-ERRCODE
+                        PERFORM 500-MOVE-ERROR
+                        MOVE  'Y'      TO   WSAA-EXIST-COVR
+
+                     END-IF
+
+                 END-IF
 
               END-IF
 
-              SUBTRACT 1  FROM WSAA-CNTLIFE-R
+              MOVE COVTCSN-COVERAGE    TO   WSAA-CNTCOVR
 
            ELSE
-              SUBTRACT 1  FROM WSAA-CNTLIFE-R
-              ADD 2 TO WSAA-CNTLIFE-R
-              IF COVTCSN-LIFE          =  WSAA-CNTLIFE
 
-                 SUBTRACT 2 FROM WSAA-CNTLIFE-R
-                 ADD 1 TO WSAA-CNTLIFE-R
-                 MOVE ZEROES TO WSAA-CNTCOVR-R
-                 GO TO 300-START
+              IF WSAA-FIRSTR-CHECKED     =  'N'
 
-             ELSE
-
-                 MOVE EZ81                TO  WSAA-ERRCODE
+                 MOVE EZ81            TO    WSAA-ERRCODE
                  PERFORM 500-MOVE-ERROR
-                 MOVE 'Y'                 TO  WSAA-END
-                 GO TO 310-EXIT
+                 MOVE 'Y'             TO    WSAA-EXIST-LIFE
+                 MOVE 'Y'             TO    WSAA-FIRSTR-CHECKED
 
-             END-IF
+              ELSE
+
+                  ADD 1               TO    WSAA-CNTLIFE-R
+                  IF  COVTCSN-LIFE   NOT =  WSAA-CNTLIFE
+
+                      MOVE EZ81       TO    WSAA-ERRCODE
+                      PERFORM 500-MOVE-ERROR
+                      MOVE 'Y'        TO    WSAA-EXIST-LIFE
+
+                  END-IF
+
+              END-IF
+
+              MOVE COVTCSN-LIFE        TO   WSAA-CNTLIFE
+              MOVE '00'                TO   WSAA-CNTCOVR
+              GO TO 300-START
 
            END-IF.
+
+           MOVE 'Y'                    TO   WSAA-FIRSTR-CHECKED
+
+           IF WSAA-EXIST-LIFE             = 'Y' AND
+              WSAA-EXIST-COVR             = 'Y'
+
+              MOVE 'Y'                 TO   WSAA-END
+
+           END-IF.
+
 
        310-EXIT.
            EXIT.
@@ -225,7 +238,7 @@
            MOVE WSAA-SUBR              TO SYSR-SUBRNAME.
            MOVE SYSR-STATUZ            TO VLSB-STATUZ.
       *
-           IF  SYSR-STATUZ             =  BOMB
+           IF  SYSR-STATUZ                = BOMB
                GO TO 690-EXIT
            END-IF.
       *
